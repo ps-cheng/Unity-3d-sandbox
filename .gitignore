@@ -1,3 +1,6 @@
+# Project-specific ignores
+3D_ThirdPerson_Plan.txt
+
 # Unity .gitignore Template
 # Source: https://github.com/github/gitignore/blob/main/Unity.gitignore
 # Last synced: 2025-12-18
