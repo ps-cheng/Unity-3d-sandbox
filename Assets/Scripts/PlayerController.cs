@@ -35,9 +35,24 @@ public class PlayerController : MonoBehaviour
         isGrounded = controller.isGrounded;
         if (isGrounded && velocity.y < 0)
             velocity.y = -2f;
+
         //移動
-        Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
+        Vector3 camForward = Camera.main.transform.forward;
+        Vector3 camRight = Camera.main.transform.right;
+
+        camForward.y = 0f;
+        camRight.y = 0f;
+        camForward.Normalize();
+        camRight.Normalize();
+        Vector3 move = camRight * moveInput.x + camForward * moveInput.y;
         controller.Move(move * moveSpeed * Time.deltaTime);
+
+        //旋轉面向
+        if(move != Vector3.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(move);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.deltaTime);
+        }
 
         //重力
         velocity.y += gravity * Time.deltaTime;
