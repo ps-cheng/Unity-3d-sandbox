@@ -68,7 +68,10 @@ public class PlayerController : MonoBehaviour
         }
 
         //重力
-        velocity.y += gravity * Time.deltaTime;
+        if (velocity.y < 0)
+            velocity.y += gravity * 2f * Time.deltaTime;
+        else
+            velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
 
         //移動
@@ -76,6 +79,6 @@ public class PlayerController : MonoBehaviour
         animator.SetFloat("Speed", Mathf.MoveTowards(animator.GetFloat("Speed"), targetSpeed, Time.deltaTime * 5f));
         if(controller.isGrounded) animator.SetBool("IsJumping", false);
         animator.SetBool("IsFalling", !controller.isGrounded && velocity.y < 0f);
-        Debug.Log(controller.isGrounded);
+        Debug.Log($"{controller.isGrounded}, {velocity.y}");
     }
 }
