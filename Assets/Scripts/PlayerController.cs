@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
     bool isGrounded;
 
     Animator animator;
+    bool isSprinting;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -28,8 +29,17 @@ public class PlayerController : MonoBehaviour
 
     void OnJump(InputValue value)
     {
-        if (isGrounded)
+        if (controller.isGrounded)
+        {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            animator.SetBool("IsJumping", true);
+        }
+    }
+
+    void OnSprint(InputValue value)
+    {
+        if (value.isPressed)
+            isSprinting = !isSprinting;
     }
 
     // Update is called once per frame
@@ -61,6 +71,11 @@ public class PlayerController : MonoBehaviour
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
 
-        animator.SetFloat("Speed", moveInput.magnitude);
+        //移動
+        float targetSpeed = moveInput.magnitude * (isSprinting ? 2f : 1f);
+        animator.SetFloat("Speed", Mathf.MoveTowards(animator.GetFloat("Speed"), targetSpeed, Time.deltaTime * 5f));
+        if(controller.isGrounded) animator.SetBool("IsJumping", false);
+        animator.SetBool("IsFalling", !controller.isGrounded && velocity.y < 0f);
+        Debug.Log(controller.isGrounded);
     }
 }
