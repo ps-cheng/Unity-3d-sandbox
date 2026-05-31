@@ -12,10 +12,13 @@ public class PlayerController : MonoBehaviour
     Vector3 velocity; //垂直速度
     bool isGrounded;
 
+    Animator animator;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         controller = GetComponent<CharacterController>();
+        animator = GetComponent<Animator>();
     }
 
     void OnMove(InputValue value)
@@ -57,5 +60,7 @@ public class PlayerController : MonoBehaviour
         //重力
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
+
+        animator.SetFloat("Speed", moveInput.magnitude);
     }
 }
