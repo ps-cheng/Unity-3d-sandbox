@@ -6,11 +6,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float moveSpeed = 5f;
     [SerializeField] float jumpHeight = 1.5f;
     [SerializeField] float gravity = -20f;
+    [SerializeField] LayerMask groundLayer;
 
     CharacterController controller;
     Vector2 moveInput;
     Vector3 velocity; //垂直速度
     bool isGrounded;
+    float groundCheckDistance = 0.15f;
 
     Animator animator;
     bool isSprinting;
@@ -29,12 +31,12 @@ public class PlayerController : MonoBehaviour
 
     void OnJump(InputValue value)
     {
-        if (controller.isGrounded)
+        if (Physics.Raycast(transform.position, Vector3.down, groundCheckDistance, groundLayer))
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             animator.SetBool("IsJumping", true);
         }
-        Debug.Log("OnJump called, isGrounded: " + controller.isGrounded);
+        Debug.DrawRay(transform.position, Vector3.down * 1.1f, Color.red);
     }
 
     void OnSprint(InputValue value)
@@ -46,7 +48,7 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        isGrounded = controller.isGrounded;
+        isGrounded = Physics.Raycast(transform.position, Vector3.down, groundCheckDistance, groundLayer);
         if (isGrounded && velocity.y < 0)
             velocity.y = -2f;
 
