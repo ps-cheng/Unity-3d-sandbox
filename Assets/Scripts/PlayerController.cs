@@ -34,6 +34,7 @@ public class PlayerController : MonoBehaviour
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             animator.SetBool("IsJumping", true);
         }
+        Debug.Log("OnJump called, isGrounded: " + controller.isGrounded);
     }
 
     void OnSprint(InputValue value)
@@ -79,6 +80,5 @@ public class PlayerController : MonoBehaviour
         animator.SetFloat("Speed", Mathf.MoveTowards(animator.GetFloat("Speed"), targetSpeed, Time.deltaTime * 5f));
         if(controller.isGrounded) animator.SetBool("IsJumping", false);
         animator.SetBool("IsFalling", !controller.isGrounded && velocity.y < 0f);
-        Debug.Log($"{controller.isGrounded}, {velocity.y}");
     }
 }
