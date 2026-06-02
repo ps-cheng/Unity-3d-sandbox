@@ -46,6 +46,8 @@ public class EnemyAI : MonoBehaviour
     void Chase()
     {
         agent.SetDestination(player.position);
+        if (agent.pathStatus == NavMeshPathStatus.PathInvalid)
+            agent.ResetPath();
     }
 
     void Patrol()
