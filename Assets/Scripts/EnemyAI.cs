@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.Assertions.Must;
 
 public class EnemyAI : MonoBehaviour
 {
@@ -25,6 +24,8 @@ public class EnemyAI : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         player = GameObject.FindWithTag("Player").transform;
+        if (patrolPoints.Length > 0)
+            agent.SetDestination(patrolPoints[0].position);
     }
 
     // Update is called once per frame
@@ -35,12 +36,17 @@ public class EnemyAI : MonoBehaviour
         if(currentState == State.Patrol && distanceToPlayer < detectionRange)
             currentState = State.Chase;
         else if (currentState == State.Chase && distanceToPlayer > chaseRange)
+        {
             currentState = State.Patrol;
+            isWaiting = false;
+            waitCounter = 0f;
+            agent.SetDestination(patrolPoints[currentPatrolIndex].position);
+        }
 
         if (currentState == State.Patrol)
             Patrol();
         else
-            Chase();        
+            Chase();
     }
 
     void Chase()
@@ -67,7 +73,7 @@ public class EnemyAI : MonoBehaviour
             return;
         }
 
-        if (agent.remainingDistance < 0.5f)
+        if (agent.hasPath && agent.remainingDistance < 0.5f)
             isWaiting = true;
     }
 }
