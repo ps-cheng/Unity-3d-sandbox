@@ -5,6 +5,7 @@ public class EnemyAI : MonoBehaviour
 {
     NavMeshAgent agent;
     Transform player;
+    Animator animator;
 
     enum State { Patrol, Chase }
     State currentState = State.Patrol;
@@ -19,10 +20,12 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] float detectionRange = 5f;
     [SerializeField] float chaseRange = 8f;
 
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>();
         player = GameObject.FindWithTag("Player").transform;
         if (patrolPoints.Length > 0)
             agent.SetDestination(patrolPoints[0].position);
@@ -51,6 +54,7 @@ public class EnemyAI : MonoBehaviour
 
     void Chase()
     {
+        animator.SetFloat("Speed", 2f);
         agent.SetDestination(player.position);
         if (agent.pathStatus == NavMeshPathStatus.PathInvalid)
             agent.ResetPath();
@@ -62,6 +66,7 @@ public class EnemyAI : MonoBehaviour
 
         if (isWaiting)
         {
+            animator.SetFloat("Speed", 0f);
             waitCounter += Time.deltaTime;
             if (waitCounter > waitTime)
             {
@@ -72,7 +77,7 @@ public class EnemyAI : MonoBehaviour
             }
             return;
         }
-
+        animator.SetFloat("Speed", 1f);
         if (agent.hasPath && agent.remainingDistance < 0.5f)
             isWaiting = true;
     }
