@@ -7,7 +7,7 @@ public class EnemyAI : MonoBehaviour
     Transform player;
     Animator animator;
 
-    enum State { Patrol, Chase }
+    enum State { Patrol, Chase, Attack }
     State currentState = State.Patrol;
 
     [SerializeField] Transform[] patrolPoints;
@@ -19,6 +19,9 @@ public class EnemyAI : MonoBehaviour
 
     [SerializeField] float detectionRange = 5f;
     [SerializeField] float chaseRange = 8f;
+    [SerializeField] float attackRange = 2f;
+    [SerializeField] float attackCoolDown = 1.5f;
+    float attackTimer = 0f;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -29,6 +32,7 @@ public class EnemyAI : MonoBehaviour
         player = GameObject.FindWithTag("Player").transform;
         if (patrolPoints.Length > 0)
             agent.SetDestination(patrolPoints[0].position);
+        agent.stoppingDistance = 0f;
     }
 
     // Update is called once per frame
@@ -36,7 +40,7 @@ public class EnemyAI : MonoBehaviour
     {
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
-        if(currentState == State.Patrol && distanceToPlayer < detectionRange)
+        if (currentState == State.Patrol && distanceToPlayer < detectionRange)
             currentState = State.Chase;
         else if (currentState == State.Chase && distanceToPlayer > chaseRange)
         {
@@ -45,11 +49,28 @@ public class EnemyAI : MonoBehaviour
             waitCounter = 0f;
             agent.SetDestination(patrolPoints[currentPatrolIndex].position);
         }
+        else if (currentState == State.Chase && distanceToPlayer < attackRange)
+        {
+            currentState = State.Attack;
+            isWaiting = false;
+            agent.isStopped = true;
+            agent.velocity = Vector3.zero;
+            agent.ResetPath();
+        }
+        else if (currentState == State.Attack && distanceToPlayer > attackRange + 0.4f)
+        {
+            currentState = State.Chase;
+            isWaiting = false;
+            agent.isStopped = false;
+            attackTimer = 0;
+        }
 
         if (currentState == State.Patrol)
             Patrol();
-        else
+        else if (currentState == State.Chase)
             Chase();
+        else if (currentState == State.Attack)
+            Attack();
     }
 
     void Chase()
@@ -58,6 +79,7 @@ public class EnemyAI : MonoBehaviour
         agent.SetDestination(player.position);
         if (agent.pathStatus == NavMeshPathStatus.PathInvalid)
             agent.ResetPath();
+        Debug.DrawLine(transform.position, agent.destination, Color.green);
     }
 
     void Patrol()
@@ -80,5 +102,15 @@ public class EnemyAI : MonoBehaviour
         animator.SetFloat("Speed", 1f);
         if (agent.hasPath && agent.remainingDistance < 0.5f)
             isWaiting = true;
+    }
+
+    void Attack()
+    {
+        attackTimer += Time.deltaTime;
+        if (attackTimer >= attackCoolDown)
+        {
+            animator.SetTrigger("Attack");
+            attackTimer = 0f;
+        }
     }
 }
