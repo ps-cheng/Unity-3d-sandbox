@@ -111,3 +111,6 @@ InitTestScene*.unity*
 
 # Packages
 /Packages/com.unity.cinemachine/
+
+# Imported Assets
+/[Aa]ssets/Synty/*
