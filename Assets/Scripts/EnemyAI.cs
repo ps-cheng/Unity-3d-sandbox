@@ -19,7 +19,7 @@ public class EnemyAI : MonoBehaviour
 
     [SerializeField] float detectionRange = 5f;
     [SerializeField] float chaseRange = 8f;
-    [SerializeField] float attackRange = 2f;
+    [SerializeField] float attackRange = 0.5f;
     [SerializeField] float attackCoolDown = 1.5f;
     float attackTimer = 0f;
 
@@ -106,11 +106,15 @@ public class EnemyAI : MonoBehaviour
 
     void Attack()
     {
-        attackTimer += Time.deltaTime;
-        if (attackTimer >= attackCoolDown)
+        Vector3 direction = (player.position - transform.position).normalized;
+        direction.y = 0f;
+        if (direction != Vector3.zero)
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), 10f * Time.deltaTime);
+        attackTimer -= Time.deltaTime;
+        if (attackTimer <= 0)
         {
             animator.SetTrigger("Attack");
-            attackTimer = 0f;
+            attackTimer = attackCoolDown;
         }
     }
 }
