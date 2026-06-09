@@ -7,12 +7,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float jumpHeight = 1.5f;
     [SerializeField] float gravity = -20f;
     [SerializeField] LayerMask groundLayer;
+    [SerializeField] float groundCheckRadius = 0.1f;
 
     CharacterController controller;
     Vector2 moveInput;
     Vector3 velocity; //垂直速度
     bool isGrounded;
-    float groundCheckDistance = 0.15f;
+    float groundCheckDistance = 0.2f;
 
     Animator animator;
     bool isSprinting;
@@ -31,12 +32,11 @@ public class PlayerController : MonoBehaviour
 
     void OnJump(InputValue value)
     {
-        if (Physics.Raycast(transform.position, Vector3.down, groundCheckDistance, groundLayer))
+        if (CanJump())
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             animator.SetBool("IsJumping", true);
         }
-        Debug.DrawRay(transform.position, Vector3.down * 1.1f, Color.red);
     }
 
     void OnSprint(InputValue value)
@@ -48,7 +48,7 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        isGrounded = Physics.Raycast(transform.position, Vector3.down, groundCheckDistance, groundLayer);
+        isGrounded = CanJump();
         if (isGrounded && velocity.y < 0)
             velocity.y = -2f;
 
@@ -82,5 +82,11 @@ public class PlayerController : MonoBehaviour
         animator.SetFloat("Speed", Mathf.MoveTowards(animator.GetFloat("Speed"), targetSpeed, Time.deltaTime * 5f));
         if(controller.isGrounded) animator.SetBool("IsJumping", false);
         animator.SetBool("IsFalling", !controller.isGrounded && velocity.y < 0f);
+    }
+
+    bool CanJump()
+    {
+        Vector3 origin = transform.position + Vector3.up * (groundCheckRadius + 0.01f);
+        return Physics.SphereCast(origin, groundCheckRadius, Vector3.down, out RaycastHit hit, groundCheckDistance + groundCheckRadius, groundLayer);
     }
 }
