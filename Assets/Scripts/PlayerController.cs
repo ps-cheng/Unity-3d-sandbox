@@ -7,7 +7,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float jumpHeight = 1.5f;
     [SerializeField] float gravity = -20f;
     [SerializeField] LayerMask groundLayer;
-    [SerializeField] float groundCheckRadius = 0.1f;
 
     CharacterController controller;
     Vector2 moveInput;
@@ -49,8 +48,6 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         isGrounded = CanJump();
-        if (isGrounded && velocity.y < 0)
-            velocity.y = -2f;
 
         //移動
         Vector3 camForward = Camera.main.transform.forward;
@@ -80,13 +77,27 @@ public class PlayerController : MonoBehaviour
         //移動
         float targetSpeed = moveInput.magnitude * (isSprinting ? 2f : 1f);
         animator.SetFloat("Speed", Mathf.MoveTowards(animator.GetFloat("Speed"), targetSpeed, Time.deltaTime * 5f));
-        if(controller.isGrounded) animator.SetBool("IsJumping", false);
-        animator.SetBool("IsFalling", !controller.isGrounded && velocity.y < 0f);
+        animator.SetBool("IsFalling", !isGrounded && velocity.y < 0f);
+
+        if (isGrounded && velocity.y < 0)
+        {
+            velocity.y = -2f;
+            animator.SetBool("IsJumping", false);
+        }
+        Debug.Log($"isGrounded: {isGrounded}, velocity.y: {velocity.y}, IsFalling: {animator.GetBool("IsFalling")}");
     }
 
     bool CanJump()
     {
-        Vector3 origin = transform.position + Vector3.up * (groundCheckRadius + 0.01f);
-        return Physics.SphereCast(origin, groundCheckRadius, Vector3.down, out RaycastHit hit, groundCheckDistance + groundCheckRadius, groundLayer);
+        //用Controller底部的半球做SphereCast
+        Vector3 origin = transform.position
+                       + controller.center
+                       + Vector3.down * (controller.height * 0.5f - controller.radius);
+        return Physics.SphereCast(origin,
+            controller.radius,
+            Vector3.down,
+            out RaycastHit hit, 
+            groundCheckDistance,
+            groundLayer);
     }
 }
