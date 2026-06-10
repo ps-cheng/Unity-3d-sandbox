@@ -84,7 +84,6 @@ public class PlayerController : MonoBehaviour
             velocity.y = -2f;
             animator.SetBool("IsJumping", false);
         }
-        Debug.Log($"isGrounded: {isGrounded}, velocity.y: {velocity.y}, IsFalling: {animator.GetBool("IsFalling")}");
     }
 
     bool CanJump()
